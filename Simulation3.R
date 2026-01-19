@@ -49,33 +49,31 @@ get_slope <- function(y, x) {
 # (A) "Ignore CR" estimator (uses contaminated Y_obs, all data)
 est_all <- get_slope(Y_obs, X)
 
-# (B) true_R deletion using TRUE R (not available in practice)
+# (B) Oracle deletion using TRUE R (not available in practice)
 est_R1  <- get_slope(Y_obs[R == 1], X[R == 1])
 
 # (C) Practical deletion using R_hat (what you'd do with a detector)
 est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
 
 # -----------------------
-# Bias decomposition (3-part)
+# Bias decomposition (2-part)
 # -----------------------
 total_bias_practical <- est_Rhat1 - TE_true
 
-bias_contamination   <- est_all   - TE_true # wrong handling if you ignore CR
-bias_true_R_deletion <- est_R1    - est_all # effect of deleting (R known)
+bias_oracle_deletion <- est_R1    - TE_true # effect of deleting (R known)
 bias_misclass_R      <- est_Rhat1 - est_R1  # extra bias from using R_hat
 
 # exact add-up check
 bias_decomp_check <- total_bias_practical -
-  (bias_contamination + bias_true_R_deletion + bias_misclass_R)
+  (bias_contamination + bias_oracle_deletion + bias_misclass_R)
 
 data.frame(
   TE_true = TE_true,
   est_all = est_all,
-  est_R1_true_R = est_R1,
+  est_R1_oracle = est_R1,
   est_Rhat1_practical = est_Rhat1,
   total_bias_practical = total_bias_practical,
-  bias_contamination = bias_contamination,
-  bias_true_R_deletion = bias_true_R_deletion,
+  bias_oracle_deletion = bias_oracle_deletion,
   bias_misclass_R = bias_misclass_R,
   bias_decomp_check = bias_decomp_check
 )
@@ -112,21 +110,19 @@ simulate_once <- function(n = 30000,
   est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
   
   total_bias_practical <- est_Rhat1 - TE_true
-  bias_contamination   <- est_all   - TE_true
-  bias_true_R_deletion <- est_R1    - est_all
+  bias_oracle_deletion <- est_R1    - TE_true
   bias_misclass_R      <- est_Rhat1 - est_R1
   
   bias_decomp_check <- total_bias_practical -
-    (bias_contamination + bias_true_R_deletion + bias_misclass_R)
+    (bias_oracle_deletion + bias_misclass_R)
   
   c(
     TE_true = TE_true,
     est_all = est_all,
-    est_R1_true_R = est_R1,
+    est_R1_oracle = est_R1,
     est_Rhat1_practical = est_Rhat1,
     total_bias_practical = total_bias_practical,
-    bias_contamination = bias_contamination,
-    bias_true_R_deletion = bias_true_R_deletion,
+    bias_oracle_deletion = bias_oracle_deletion,
     bias_misclass_R = bias_misclass_R,
     bias_decomp_check = bias_decomp_check
   )
@@ -145,8 +141,7 @@ library(tidyr)
 sum_table <- summary_df |>
   select(
     total_bias_practical,
-    bias_contamination,
-    bias_true_R_deletion,
+    bias_oracle_deletion,
     bias_misclass_R,
     bias_decomp_check
   ) |>
@@ -186,9 +181,9 @@ Y1 <- rnorm(n, 1, 1)
 
 Y <- ifelse(X == 0, Y0, Y1)
 
-R0 <- rbinom(n, 1, 0.3)
-R1 <- rbinom(n, 1, 0.6)
-R <- ifelse(Y == 0, R0, R1) ## R is affected by Y
+R0 <- rbinom(n, 1, 0.1)
+R1 <- rbinom(n, 1, 0.7)
+R <- ifelse(Y > 0, R1, R0) ## R is affected by Y
 
 ## PO of R_hat - related to R
 R_hat0 <- rbinom(n, 1, 0.2)
@@ -215,33 +210,31 @@ get_slope <- function(y, x) {
 # (A) "Ignore CR" estimator (uses contaminated Y_obs, all data)
 est_all <- get_slope(Y_obs, X)
 
-# (B) true_R deletion using TRUE R (not available in practice)
+# (B) Oracle deletion using TRUE R (not available in practice)
 est_R1  <- get_slope(Y_obs[R == 1], X[R == 1])
 
 # (C) Practical deletion using R_hat (what you'd do with a detector)
 est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
 
 # -----------------------
-# Bias decomposition (3-part)
+# Bias decomposition (2-part)
 # -----------------------
 total_bias_practical <- est_Rhat1 - TE_true
 
-bias_contamination   <- est_all   - TE_true # wrong handling if you ignore CR
-bias_true_R_deletion <- est_R1    - est_all # effect of deleting (R known)
+bias_oracle_deletion <- est_R1    - TE_true # effect of deleting (R known)
 bias_misclass_R      <- est_Rhat1 - est_R1  # extra bias from using R_hat
 
 # exact add-up check
 bias_decomp_check <- total_bias_practical -
-  (bias_contamination + bias_true_R_deletion + bias_misclass_R)
+  ( bias_oracle_deletion + bias_misclass_R)
 
 data.frame(
   TE_true = TE_true,
   est_all = est_all,
-  est_R1_true_R = est_R1,
+  est_R1_oracle = est_R1,
   est_Rhat1_practical = est_Rhat1,
   total_bias_practical = total_bias_practical,
-  bias_contamination = bias_contamination,
-  bias_true_R_deletion = bias_true_R_deletion,
+  bias_oracle_deletion = bias_oracle_deletion,
   bias_misclass_R = bias_misclass_R,
   bias_decomp_check = bias_decomp_check
 )
@@ -251,20 +244,23 @@ data.frame(
 # (i.e., see how components behave across repeated samples)
 # ------------------------------------------------------------
 simulate_once <- function(n = 30000,
-                          pR1 = 0.5,
                           pRhat1_R0 = 0.2,
                           pRhat1_R1 = 0.7) {
   
   X <- rbinom(n, 1, 0.5)
-  R <- rbinom(n, 1, pR1)
+  
+  Y0 <- rnorm(n, 0, 1)
+  Y1 <- rnorm(n, 1, 1)
+  Y  <- ifelse(X == 0, Y0, Y1)
+  
+  R0 <- rbinom(n, 1, 0.1)
+  R1 <- rbinom(n, 1, 0.7)
+  R <- ifelse(Y > 0, R1, R0)
   
   R_hat0 <- rbinom(n, 1, pRhat1_R0)
   R_hat1 <- rbinom(n, 1, pRhat1_R1)
   R_hat  <- ifelse(R == 0, R_hat0, R_hat1)
   
-  Y0 <- rnorm(n, 0, 1)
-  Y1 <- rnorm(n, 1, 1)
-  Y  <- ifelse(X == 0, Y0, Y1)
   
   CR <- runif(n, -1, 1)
   Y_obs <- ifelse(R == 1, Y, CR)
@@ -278,21 +274,19 @@ simulate_once <- function(n = 30000,
   est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
   
   total_bias_practical <- est_Rhat1 - TE_true
-  bias_contamination   <- est_all   - TE_true
-  bias_true_R_deletion <- est_R1    - est_all
+  bias_oracle_deletion <- est_R1    - TE_true
   bias_misclass_R      <- est_Rhat1 - est_R1
   
   bias_decomp_check <- total_bias_practical -
-    (bias_contamination + bias_true_R_deletion + bias_misclass_R)
+    (bias_oracle_deletion + bias_misclass_R)
   
   c(
     TE_true = TE_true,
     est_all = est_all,
-    est_R1_true_R = est_R1,
+    est_R1_oracle = est_R1,
     est_Rhat1_practical = est_Rhat1,
     total_bias_practical = total_bias_practical,
-    bias_contamination = bias_contamination,
-    bias_true_R_deletion = bias_true_R_deletion,
+    bias_oracle_deletion = bias_oracle_deletion,
     bias_misclass_R = bias_misclass_R,
     bias_decomp_check = bias_decomp_check
   )
@@ -311,8 +305,7 @@ library(tidyr)
 sum_table <- summary_df |>
   select(
     total_bias_practical,
-    bias_contamination,
-    bias_true_R_deletion,
+    bias_oracle_deletion,
     bias_misclass_R,
     bias_decomp_check
   ) |>
