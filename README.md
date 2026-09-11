@@ -103,9 +103,9 @@ $$
 The detector is generated according to
 
 $$
-\Pr(R_{i}^{CR}=1\mid Y_{i}^{*}>0)=0.7,
+\Pr(\widehat R_i^{CR}=1\mid R_i^{CR}=0)=0.2,
 \qquad
-\Pr(R_{i}^{CR}=1\mid Y_{i}^{*}\leq 0)=0.1.
+\Pr(\widehat R_i^{CR}=1\mid R_i^{CR}=1)=0.7.
 $$
 
 Accordingly, the simulated detector has specificity 0.80 and sensitivity 0.70 under the stated coding. The script compares:
@@ -117,9 +117,9 @@ Accordingly, the simulated detector has specificity 0.80 and sensitivity 0.70 un
 It then decomposes the practical estimator's bias into bias from oracle deletion and additional bias from detector misclassification. A second condition makes the probability of attentive responding depend on the target outcome:
 
 $$
-\Pr(R_i^{CR}=1\mid Y_i^*>0)=0.7,
+\Pr(R_i^{CR}=1\mid Y_i^{*}>0)=0.7,
 \qquad
-\Pr(R_i^{CR}=1\mid Y_i^*\leq0)=0.1.
+\Pr(R_i^{CR}=1\mid Y_i^{*}\leq0)=0.1.
 $$
 
 As currently written, Simulation 3 uses $n=30{,}000$ and 200 Monte Carlo replications per condition.
