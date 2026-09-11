@@ -27,9 +27,9 @@ Thus, the observed response equals the target response when $R_i^{CR}=1$ and the
 
 Simulation 1 examines bias in estimating a population mean under three careless-response mechanisms:
 
-- **CRCR:** the response-state indicator is independent of the target response.
-- **CRAR:** the response-state indicator depends on an observed binary covariate related to the target response.
-- **CRNAR:** the response-state indicator depends directly on the target response.
+- CRCR: the response-state indicator is independent of the target response.
+- CRAR: the response-state indicator depends on an observed binary covariate related to the target response.
+- CRNAR: the response-state indicator depends directly on the target response.
 
 The target response is generated as
 
