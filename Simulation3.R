@@ -293,7 +293,7 @@ simulate_once <- function(n = 30000,
 }
 
 set.seed(1)
-M <- 200
+M <- 1000
 out <- replicate(M, simulate_once(), simplify = "matrix")
 out <- t(out)
 summary_df <- as.data.frame(out)
