@@ -103,9 +103,9 @@ $$
 The detector is generated according to
 
 $$
-\Pr(\widehat R_i^{CR}=1\mid R_i^{CR}=0)=0.2,
+\Pr(R_{i}^{CR}=1\mid Y_{i}^{*}>0)=0.7,
 \qquad
-\Pr(\widehat R_i^{CR}=1\mid R_i^{CR}=1)=0.7.
+\Pr(R_{i}^{CR}=1\mid Y_{i}^{*}\leq 0)=0.1.
 $$
 
 Accordingly, the simulated detector has specificity 0.80 and sensitivity 0.70 under the stated coding. The script compares:
