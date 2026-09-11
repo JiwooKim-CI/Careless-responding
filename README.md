@@ -81,7 +81,7 @@ The observed outcome is $Y_i^{\mathrm{obs}}=R_i^{CR}Y_i^*+(1-R_i^{CR})U_i$. Beca
 Simulation 3 studies bias arising from deletion based on an imperfect detector. Treatment and potential outcomes are generated as
 
 $$
-X_i\sim\operatorname{Bernoulli}(0.5),
+X_i\sim\mathrm{Bernoulli}(0.5),
 \qquad
 Y_i(0)\sim\mathcal N(0,1),
 \qquad
@@ -91,13 +91,13 @@ $$
 with $Y_i^*=Y_i(X_i)$. Careless responses follow
 
 $$
-U_i\sim\operatorname{Uniform}(-1,1).
+U_i\sim\mathrm{Uniform}(-1,1).
 $$
 
 Under the CRCR condition,
 
 $$
-R_i^{CR}\sim\operatorname{Bernoulli}(0.5).
+R_i^{CR}\sim\mathrm{Bernoulli}(0.5).
 $$
 
 The detector is generated according to
