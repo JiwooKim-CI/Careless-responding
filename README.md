@@ -14,10 +14,10 @@ For respondent \(i\):
 
 The observed response follows
 
-\[
+$$
 Y_i^{\mathrm{obs}}
 =R_i^{CR}Y_i^*+(1-R_i^{CR})U_i.
-\]
+$$
 
 Thus, the observed response equals the target response when \(R_i^{CR}=1\) and the careless response when \(R_i^{CR}=0\). Note that the coding may be counterintuitive: a value of one indicates an attentive, rather than careless, response.
 
@@ -55,74 +55,74 @@ The script compares the true mean with estimates based on all observed responses
 
 Simulation 2 illustrates selection or collider bias. The data-generating process is
 
-\[
+$$
 X_i\sim\mathcal N(0,1),
-\]
+$$
 
-\[
+$$
 Y_i^*=0.4X_i+\varepsilon_{Yi},
 \qquad \varepsilon_{Yi}\sim\mathcal N(0,1),
-\]
+$$
 
-\[
+$$
 P_i=0.5Y_i^*+0.4X_i+\varepsilon_{Ri},
 \qquad \varepsilon_{Ri}\sim\mathcal N(0,1),
-\]
+$$
 
-\[
+$$
 R_i^{CR}=\mathbb I(P_i>0),
 \qquad U_i\sim\mathcal N(1,1).
-\]
+$$
 
-The observed outcome is \(Y_i^{\mathrm{obs}}=R_i^{CR}Y_i^*+(1-R_i^{CR})U_i\). Because both \(X_i\) and \(Y_i^*\) affect \(R_i^{CR}\), conditioning on \(R_i^{CR}=1\) can induce selection bias. The simulation uses \(n=30{,}000\) and 1,000 replications and creates `figure_Collider.tex`.
+The observed outcome is $Y_i^{\mathrm{obs}}=R_i^{CR}Y_i^*+(1-R_i^{CR})U_i$. Because both $X_i$ and $Y_i^*$ affect $R_i^{CR}$, conditioning on $R_i^{CR}=1$ can induce selection bias. The simulation uses $n=30{,}000$ and 1,000 replications and creates `figure_Collider.tex`.
 
 ### `Simulation3.R`
 
 Simulation 3 studies bias arising from deletion based on an imperfect detector. Treatment and potential outcomes are generated as
 
-\[
+$$
 X_i\sim\operatorname{Bernoulli}(0.5),
 \qquad
 Y_i(0)\sim\mathcal N(0,1),
 \qquad
 Y_i(1)\sim\mathcal N(1,1),
-\]
+$$
 
-with \(Y_i^*=Y_i(X_i)\). Careless responses follow
+with $Y_i^*=Y_i(X_i)$. Careless responses follow
 
-\[
+$$
 U_i\sim\operatorname{Uniform}(-1,1).
-\]
+$$
 
 Under the CRCR condition,
 
-\[
+$$
 R_i^{CR}\sim\operatorname{Bernoulli}(0.5).
-\]
+$$
 
 The detector is generated according to
 
-\[
+$$
 \Pr(\widehat R_i^{CR}=1\mid R_i^{CR}=0)=0.2,
 \qquad
 \Pr(\widehat R_i^{CR}=1\mid R_i^{CR}=1)=0.7.
-\]
+$$
 
 Accordingly, the simulated detector has specificity 0.80 and sensitivity 0.70 under the stated coding. The script compares:
 
 1. analysis of all contaminated observations;
-2. oracle deletion using the true \(R_i^{CR}\); and
-3. practical deletion using \(\widehat R_i^{CR}\).
+2. oracle deletion using the true $R_i^{CR}$; and
+3. practical deletion using $\widehat R_i^{CR}$.
 
 It then decomposes the practical estimator's bias into bias from oracle deletion and additional bias from detector misclassification. A second condition makes the probability of attentive responding depend on the target outcome:
 
-\[
+$$
 \Pr(R_i^{CR}=1\mid Y_i^*>0)=0.7,
 \qquad
 \Pr(R_i^{CR}=1\mid Y_i^*\leq0)=0.1.
-\]
+$$
 
-As currently written, Simulation 3 uses \(n=30{,}000\) and 200 Monte Carlo replications per condition.
+As currently written, Simulation 3 uses $n=30{,}000$ and 200 Monte Carlo replications per condition.
 
 ## Requirements
 
