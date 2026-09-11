@@ -4,7 +4,7 @@ This repository contains R scripts illustrating how careless responding and the 
 
 ## Notation and coding
 
-For respondent \(i\):
+For respondent $i$:
 
 - $R_i^{CR}=1$ denotes attentive responding.
 - $R_i^{CR}=0$ denotes careless responding.
@@ -19,7 +19,7 @@ Y_i^{\mathrm{obs}}
 =R_i^{CR}Y_i^*+(1-R_i^{CR})U_i.
 $$
 
-Thus, the observed response equals the target response when \(R_i^{CR}=1\) and the careless response when \(R_i^{CR}=0\). Note that the coding may be counterintuitive: a value of one indicates an attentive, rather than careless, response.
+Thus, the observed response equals the target response when $R_i^{CR}=1$ and the careless response when $R_i^{CR}=0$. Note that the coding may be counterintuitive: a value of one indicates an attentive, rather than careless, response.
 
 ## Files
 
@@ -43,9 +43,9 @@ $$
 U_i\sim\mathcal N(\mu_U,1),
 $$
 
-where $\mu_U=0$ represents an unbiased careless-response distribution and \(\mu_U=1\) represents a systematically shifted distribution. Each condition uses $n=30{,}000$ and 1,000 Monte Carlo replications.
+where $\mu_U=0$ represents an unbiased careless-response distribution and $\mu_U=1$ represents a systematically shifted distribution. Each condition uses $n=30{,}000$ and 1,000 Monte Carlo replications.
 
-The script compares the true mean with estimates based on all observed responses and on the subset for which the true state satisfies \(R_i^{CR}=1\). It creates the following LaTeX/TikZ figures:
+The script compares the true mean with estimates based on all observed responses and on the subset for which the true state satisfies $R_i^{CR}=1$. It creates the following LaTeX/TikZ figures:
 
 - `figure_CRCR.tex`
 - `figure_CRAR.tex`
