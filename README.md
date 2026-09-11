@@ -33,17 +33,17 @@ Simulation 1 examines bias in estimating a population mean under three careless-
 
 The target response is generated as
 
-\[
+$$
 X_i^*\sim\mathcal N(0,1).
-\]
+$$
 
 The careless response is generated as
 
-\[
+$$
 U_i\sim\mathcal N(\mu_U,1),
-\]
+$$
 
-where \(\mu_U=0\) represents an unbiased careless-response distribution and \(\mu_U=1\) represents a systematically shifted distribution. Each condition uses \(n=30{,}000\) and 1,000 Monte Carlo replications.
+where $\mu_U=0$ represents an unbiased careless-response distribution and \(\mu_U=1\) represents a systematically shifted distribution. Each condition uses $n=30{,}000$ and 1,000 Monte Carlo replications.
 
 The script compares the true mean with estimates based on all observed responses and on the subset for which the true state satisfies \(R_i^{CR}=1\). It creates the following LaTeX/TikZ figures:
 
