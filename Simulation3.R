@@ -161,7 +161,7 @@ sum_table <- summary_df |>
 
 sum_table
 kable(
-  sum_table |> mutate(across(where(is.numeric), ~ round(.x, 4))),
+  sum_table |> mutate(across(where(is.numeric), ~ round(.x, 3))),
   caption = "Monte Carlo summary of bias decomposition components (Simulation 3, CRCR)."
 )
 
@@ -325,7 +325,7 @@ sum_table <- summary_df |>
 
 sum_table
 kable(
-  sum_table |> mutate(across(where(is.numeric), ~ round(.x, 4))),
+  sum_table |> mutate(across(where(is.numeric), ~ round(.x, 3))),
   caption = "Monte Carlo summary of bias decomposition components (Simulation 3, CRNAR)."
 )
 
