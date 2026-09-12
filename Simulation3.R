@@ -65,7 +65,7 @@ bias_misclass_R      <- est_Rhat1 - est_R1  # extra bias from using R_hat
 
 # exact add-up check
 bias_decomp_check <- total_bias_practical -
-  (bias_contamination + bias_oracle_deletion + bias_misclass_R)
+  (bias_oracle_deletion + bias_misclass_R)
 
 data.frame(
   TE_true = TE_true,
