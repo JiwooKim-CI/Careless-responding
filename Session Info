@@ -1,0 +1,48 @@
+R version 4.5.3 (2026-03-11)
+Platform: aarch64-apple-darwin20
+Running under: macOS Tahoe 26.4.1
+
+Matrix products: default
+BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+time zone: America/New_York
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils    
+[5] datasets  methods   base     
+
+other attached packages:
+[1] knitr_1.51        tidyr_1.3.2      
+[3] dplyr_1.2.1       lavaan_0.6-21    
+[5] kableExtra_1.4.1  tikzDevice_0.12.6
+[7] ggplot2_4.0.2    
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.6       compiler_4.5.3    
+ [3] tidyselect_1.2.1   xml2_1.5.2        
+ [5] stringr_1.6.0      parallel_4.5.3    
+ [7] systemfonts_1.3.2  scales_1.4.0      
+ [9] textshaping_1.0.5  fastmap_1.2.0     
+[11] pbivnorm_0.6.0     R6_2.6.1          
+[13] labeling_0.4.3     generics_0.1.4    
+[15] filehash_2.4-6     MASS_7.3-65       
+[17] tibble_3.3.1       svglite_2.2.2     
+[19] pillar_1.11.1      RColorBrewer_1.1-3
+[21] rlang_1.2.0        utf8_1.2.6        
+[23] stringi_1.8.7      xfun_0.57         
+[25] quadprog_1.5-8     S7_0.2.1          
+[27] viridisLite_0.4.3  cli_3.6.6         
+[29] withr_3.0.2        magrittr_2.0.5    
+[31] digest_0.6.39      grid_4.5.3        
+[33] rstudioapi_0.18.0  lifecycle_1.0.5   
+[35] vctrs_0.7.3        mnormt_2.1.2      
+[37] evaluate_1.0.5     glue_1.8.0        
+[39] farver_2.1.2       ragg_1.5.2        
+[41] stats4_4.5.3       purrr_1.2.2       
+[43] rmarkdown_2.31     tools_4.5.3       
+[45] pkgconfig_2.0.3    htmltools_0.5.9 
