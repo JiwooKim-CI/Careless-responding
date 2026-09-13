@@ -211,9 +211,6 @@ $$
 \Pr(D_i=1\mid R_i^{CR}=0)=0.2
 $$
 
-$$
-
-
 
 and
 
@@ -248,3 +245,4 @@ Run the scripts from the repository root:
 source("Simulation1.R")
 source("Simulation2.R")
 source("Simulation3.R")
+```
