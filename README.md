@@ -14,13 +14,7 @@ For respondent $i$:
 
 The observed response follows
 
-$$
-V_i^{\mathrm{obs}}
-=
-R_i^{CR}V_i^*
-+
-(1-R_i^{CR})U_i.
-$$
+$$V_i^{\mathrm{obs}}=R_i^{CR}V_i^*+(1-R_i^{CR})U_i.$$
 
 Thus, the observed response equals the target response when $R_i^{CR}=1$ and the carelessly generated response when $R_i^{CR}=0$. Note that the coding may be counterintuitive: a value of one indicates attentive rather than careless responding.
 
@@ -36,9 +30,7 @@ Simulation 1 examines bias in estimating the mean of the target-response distrib
 
 The careless response is generated as
 
-$$
-U_i\sim\mathcal{N}(\mu_U,1),
-$$
+$$U_i\sim\mathcal{N}(\mu_U,1),$$
 
 where $\mu_U=0$ represents an unbiased careless-response distribution and $\mu_U=1$ represents a systematically shifted careless-response distribution. This stylized manipulation contrasts a condition in which the careless-response distribution has the same mean as the target-response distribution with a condition in which it systematically shifts the observed-response distribution.
 
@@ -62,9 +54,7 @@ $$
 
 The target response is then generated as
 
-$$
-X_i^*
-=
+$$X_i^*=
 0.5(C_i-0.5)+\varepsilon_{Xi},
 \qquad
 \varepsilon_{Xi}\sim\mathcal{N}(0,0.9375).
@@ -72,9 +62,7 @@ $$
 
 This parameterization gives $X_i^*$ a marginal mean of zero and a marginal variance of one. The probability of attentive responding is
 
-$$
-\Pr(R_i^{CR}=1\mid C_i)
-=
+$$\Pr(R_i^{CR}=1\mid C_i)=
 \frac{\exp(0.6C_i)}
 {1+\exp(0.6C_i)}.
 $$
@@ -90,8 +78,7 @@ $$
 and the probability of attentive responding depends directly on the target response:
 
 $$
-\Pr(R_i^{CR}=1\mid X_i^*)
-=
+\Pr(R_i^{CR}=1\mid X_i^*)=
 \frac{\exp(0.5X_i^*)}
 {1+\exp(0.5X_i^*)}.
 $$
@@ -101,8 +88,7 @@ In the CRAR and CRNAR conditions, the logistic transformation ensures that all r
 The observed response is generated as
 
 $$
-X_i^{\mathrm{obs}}
-=
+X_i^{\mathrm{obs}}=
 R_i^{CR}X_i^*
 +
 (1-R_i^{CR})U_i.
@@ -127,8 +113,7 @@ $$
 and
 
 $$
-Y_i^*
-=
+Y_i^*=
 0.4X_i+\varepsilon_{Yi},
 \qquad
 \varepsilon_{Yi}\sim\mathcal{N}(0,1).
@@ -137,8 +122,7 @@ $$
 A latent response-state propensity is generated as
 
 $$
-P_i
-=
+P_i=
 0.5Y_i^*
 +
 0.4X_i
@@ -157,8 +141,7 @@ $$
 The observed outcome is
 
 $$
-Y_i^{\mathrm{obs}}
-=
+Y_i^{\mathrm{obs}}=
 R_i^{CR}Y_i^*
 +
 (1-R_i^{CR})U_i.
@@ -181,9 +164,7 @@ $$
 and the uncontaminated target outcome is generated directly as
 
 $$
-Y_i^*
-=
-X_i+\varepsilon_{Yi},
+Y_i^*=X_i+\varepsilon_{Yi},
 \qquad
 \varepsilon_{Yi}\sim\mathcal{N}(0,1).
 $$
@@ -217,8 +198,7 @@ $$
 The observed outcome is generated as
 
 $$
-Y_i^{\mathrm{obs}}
-=
+Y_i^{\mathrm{obs}}=
 R_i^{CR}Y_i^*
 +
 (1-R_i^{CR})U_i.
@@ -251,8 +231,7 @@ The script compares:
 The practical estimator's bias is decomposed as
 
 $$
-\text{Total practical bias}
-=
+\text{Total practical bias}=
 \text{Handling-strategy bias}
 +
 \text{Misclassification bias}.
