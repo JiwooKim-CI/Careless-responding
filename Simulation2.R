@@ -16,10 +16,12 @@ simulate_once <- function(n = 30000) {
   u <- rnorm(n, mean = 1, sd = 1)
   y <- 0.4 * x + rnorm(n, mean = 0, sd = 1)
 
-  # Both y and x affect the latent response-state propensity, so r is a
-  # collider. Here r = 1 denotes an attentive response.
-  p <- 0.5 * y + 0.4 * x + rnorm(n, mean = 0, sd = 1)
-  r <- as.integer(p > 0)
+ 
+  # Here r = 1 denotes an attentive response.
+  
+  p <- plogis(0.5 * y + 0.4 * x)
+  r <- rbinom(n, size = 1, prob = p)
+ 
 
   y_obs <- ifelse(r == 1, y, u)
 
