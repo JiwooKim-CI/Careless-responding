@@ -78,9 +78,9 @@ $$
 and the probability of attentive responding depends directly on the target response:
 
 $$
-\Pr(R_i^{CR}=1\mid X_i^*)=
-\frac{\exp(0.5X_i^*)}
-{1+\exp(0.5X_i^*)}.
+\Pr(R_{i}^{CR}=1\mid X_{i}^{*})=
+\frac{\exp(0.5X_{i}^{*})}
+{1+\exp(0.5X_{i}^{*})}.
 $$
 
 In the CRAR and CRNAR conditions, the logistic transformation ensures that all response-state probabilities lie between zero and one. The coefficients governing the response-state mechanism are held constant across the $\mu_U=0$ and $\mu_U=1$ conditions.
