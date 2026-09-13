@@ -1,331 +1,254 @@
-## Package
+## Simulation 3: Bias from handling and imperfect detection
+## Produces comprehensive Table S3 and the two decomposition tables.
 
 library(dplyr)
 library(tidyr)
-library(ggplot2)
 library(knitr)
 
-## CRCR case
-
 set.seed(1)
+
 n <- 30000
+B <- 1000
 
-X  <- rbinom(n, 1, 0.5)
-X0 <- 0
-X1 <- 1
-
-R  <- rbinom(n, 1, 0.5)
-R0 <- 0
-R1 <- 1
-
-## PO of R_hat - related to R
-R_hat0 <- rbinom(n, 1, 0.2)
-R_hat1 <- rbinom(n, 1, 0.7)
-
-R_hat <- ifelse(R == 0, R_hat0, R_hat1)
-
-## PO of Y - affected by X
-Y0 <- rnorm(n, 0, 1)
-Y1 <- rnorm(n, 1, 1)
-
-Y <- ifelse(X == 0, Y0, Y1)
-
-## CR pattern
-CR <- runif(n, -1, 1)
-
-## Y_trueCR - Y variable under CR (CRCR case)
-Y_obs <- ifelse(R == 1, Y, CR)
-
-
-TE_true <- mean(Y1 - Y0)
-
-# -----------------------
-# Estimation helpers
-# -----------------------
 get_slope <- function(y, x) {
   unname(coef(lm(y ~ x))["x"])
 }
 
-# (A) "Ignore CR" estimator (uses contaminated Y_obs, all data)
-est_all <- get_slope(Y_obs, X)
-
-# (B) Oracle deletion using TRUE R (not available in practice)
-est_R1  <- get_slope(Y_obs[R == 1], X[R == 1])
-
-# (C) Practical deletion using R_hat (what you'd do with a detector)
-est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
-
-# -----------------------
-# Bias decomposition (2-part)
-# -----------------------
-total_bias_practical <- est_Rhat1 - TE_true
-
-bias_oracle_deletion <- est_R1    - TE_true # effect of deleting (R known)
-bias_misclass_R      <- est_Rhat1 - est_R1  # extra bias from using R_hat
-
-# exact add-up check
-bias_decomp_check <- total_bias_practical -
-  (bias_oracle_deletion + bias_misclass_R)
-
-data.frame(
-  TE_true = TE_true,
-  est_all = est_all,
-  est_R1_oracle = est_R1,
-  est_Rhat1_practical = est_Rhat1,
-  total_bias_practical = total_bias_practical,
-  bias_oracle_deletion = bias_oracle_deletion,
-  bias_misclass_R = bias_misclass_R,
-  bias_decomp_check = bias_decomp_check
-)
-
-# ------------------------------------------------------------
-# Monte Carlo wrapper to "verify" the decomposition in expectation
-# (i.e., see how components behave across repeated samples)
-# ------------------------------------------------------------
-simulate_once <- function(n = 30000,
-                          pR1 = 0.5,
-                          pRhat1_R0 = 0.2,
-                          pRhat1_R1 = 0.7) {
+simulate_once <- function(
+    n = 30000,
+    mechanism = c("CRCR", "CRNAR"),
+    p_r1 = 0.5,
+    p_r1_y_nonpositive = 0.1,
+    p_r1_y_positive = 0.7,
+    p_d1_r0 = 0.2,
+    p_d1_r1 = 0.7) {
   
-  X <- rbinom(n, 1, 0.5)
-  R <- rbinom(n, 1, pR1)
+  mechanism <- match.arg(mechanism)
   
-  R_hat0 <- rbinom(n, 1, pRhat1_R0)
-  R_hat1 <- rbinom(n, 1, pRhat1_R1)
-  R_hat  <- ifelse(R == 0, R_hat0, R_hat1)
+  # Treatment and uncontaminated target outcome.
+  x <- rbinom(n, size = 1, prob = 0.5)
+  y <- x + rnorm(n, mean = 0, sd = 1)
   
-  Y0 <- rnorm(n, 0, 1)
-  Y1 <- rnorm(n, 1, 1)
-  Y  <- ifelse(X == 0, Y0, Y1)
+  # True response state: r = 1 denotes attentive responding.
+  if (mechanism == "CRCR") {
+    r <- rbinom(n, size = 1, prob = p_r1)
+  } else {
+    prob_r1 <- ifelse(y > 0, p_r1_y_positive, p_r1_y_nonpositive)
+    r <- rbinom(n, size = 1, prob = prob_r1)
+  }
   
-  CR <- runif(n, -1, 1)
-  Y_obs <- ifelse(R == 1, Y, CR)
+  # Imperfect detector: d = 1 denotes classification as attentive.
+  prob_d1 <- ifelse(r == 0, p_d1_r0, p_d1_r1)
+  d <- rbinom(n, size = 1, prob = prob_d1)
   
-  TE_true <- mean(Y1 - Y0)
+  # Carelessly generated and observed outcomes.
+  u <- runif(n, min = -1, max = 1)
+  y_obs <- ifelse(r == 1, y, u)
   
-  get_slope <- function(y, x) unname(coef(lm(y ~ x))["x"])
+  # Use the coefficient from the uncontaminated outcome in the same replication
+  # so that the decomposition isolates handling and detection error.
+  true_effect <- get_slope(y, x)
+  est_all <- get_slope(y_obs, x)
+  est_oracle <- get_slope(y_obs[r == 1], x[r == 1])
+  est_practical <- get_slope(y_obs[d == 1], x[d == 1])
   
-  est_all   <- get_slope(Y_obs, X)
-  est_R1    <- get_slope(Y_obs[R == 1], X[R == 1])
-  est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
+  total_bias <- est_practical - true_effect
+  handling_bias <- est_oracle - true_effect
+  misclassification_bias <- est_practical - est_oracle
   
-  total_bias_practical <- est_Rhat1 - TE_true
-  bias_oracle_deletion <- est_R1    - TE_true
-  bias_misclass_R      <- est_Rhat1 - est_R1
-  
-  bias_decomp_check <- total_bias_practical -
-    (bias_oracle_deletion + bias_misclass_R)
-  
-  c(
-    TE_true = TE_true,
-    est_all = est_all,
-    est_R1_oracle = est_R1,
-    est_Rhat1_practical = est_Rhat1,
-    total_bias_practical = total_bias_practical,
-    bias_oracle_deletion = bias_oracle_deletion,
-    bias_misclass_R = bias_misclass_R,
-    bias_decomp_check = bias_decomp_check
+  tibble(
+    true_effect = true_effect,
+    naive = est_all,
+    oracle_deletion = est_oracle,
+    practical_deletion = est_practical,
+    total_bias = total_bias,
+    handling_bias = handling_bias,
+    misclassification_bias = misclassification_bias,
+    decomposition_check = total_bias -
+      (handling_bias + misclassification_bias),
+    prop_attentive = mean(r),
+    prop_classified_attentive = mean(d)
   )
 }
 
-set.seed(1)
-M <- 1000
-out <- replicate(M, simulate_once(), simplify = "matrix")
-out <- t(out)
-summary_df <- as.data.frame(out)
+run_condition <- function(mechanism, n, B) {
+  bind_rows(lapply(seq_len(B), function(b) {
+    simulate_once(n = n, mechanism = mechanism) |>
+      mutate(replication = b)
+  })) |>
+    mutate(
+      mechanism = mechanism,
+      n = n
+    )
+}
 
-colMeans(summary_df)
-library(dplyr)
-library(tidyr)
+# Keep both mechanisms instead of overwriting the first result.
+simulation3_wide <- bind_rows(
+  run_condition("CRCR", n = n, B = B),
+  run_condition("CRNAR", n = n, B = B)
+)
 
-sum_table <- summary_df |>
-  select(
-    total_bias_practical,
-    bias_oracle_deletion,
-    bias_misclass_R,
-    bias_decomp_check
+# -----------------------------------------------------------------------------
+# Comprehensive estimator-level results: Supplemental Table S3
+# -----------------------------------------------------------------------------
+
+simulation3_long <- simulation3_wide |>
+  pivot_longer(
+    cols = c(naive, oracle_deletion, practical_deletion),
+    names_to = "estimator",
+    values_to = "estimate"
   ) |>
-  pivot_longer(everything(), names_to = "quantity", values_to = "value") |>
-  group_by(quantity) |>
+  mutate(
+    estimator = recode(
+      estimator,
+      naive = "Naive (all responses)",
+      oracle_deletion = "Oracle deletion",
+      practical_deletion = "Practical deletion"
+    ),
+    estimation_error = estimate - true_effect
+  )
+
+table_s3 <- simulation3_long |>
+  group_by(mechanism, estimator, n) |>
+  summarise(
+    replications = n(),
+    true_value = 1,
+    mean_true_effect = mean(true_effect),
+    mean_estimate = mean(estimate),
+    bias = mean(estimation_error),
+    empirical_sd = sd(estimate),
+    rmse = sqrt(mean(estimation_error^2)),
+    mc_se_bias = sd(estimation_error) / sqrt(replications),
+    mean_prop_attentive = mean(prop_attentive),
+    mean_prop_classified_attentive = mean(prop_classified_attentive),
+    .groups = "drop"
+  ) |>
+  arrange(mechanism, estimator)
+
+print(table_s3)
+
+write.csv(
+  table_s3,
+  file = "table_s3_simulation3.csv",
+  row.names = FALSE
+)
+
+table_s3_latex <- table_s3 |>
+  select(
+    Mechanism = mechanism,
+    Estimator = estimator,
+    `True value` = true_value,
+    `Mean estimate` = mean_estimate,
+    Bias = bias,
+    `Empirical SD` = empirical_sd,
+    RMSE = rmse,
+    `MC SE` = mc_se_bias
+  ) |>
+  kable(
+    format = "latex",
+    booktabs = TRUE,
+    digits = 4,
+    caption = "Complete Monte Carlo Results for Simulation 3",
+    label = "tab:simulation3-complete",
+    escape = TRUE
+  )
+
+writeLines(table_s3_latex, "table_s3_simulation3.tex")
+
+# -----------------------------------------------------------------------------
+# Bias-decomposition tables retained for the main manuscript
+# -----------------------------------------------------------------------------
+
+decomposition_long <- simulation3_wide |>
+  select(
+    replication,
+    mechanism,
+    total_bias,
+    handling_bias,
+    misclassification_bias,
+    decomposition_check
+  ) |>
+  pivot_longer(
+    cols = c(
+      decomposition_check,
+      misclassification_bias,
+      handling_bias,
+      total_bias
+    ),
+    names_to = "quantity",
+    values_to = "value"
+  ) |>
+  mutate(
+    quantity = factor(
+      quantity,
+      levels = c(
+        "decomposition_check",
+        "misclassification_bias",
+        "handling_bias",
+        "total_bias"
+      ),
+      labels = c(
+        "Decomposition check",
+        "Misclassification bias",
+        "Handling-strategy bias",
+        "Total practical bias"
+      )
+    )
+  )
+
+decomposition_summary <- decomposition_long |>
+  group_by(mechanism, quantity) |>
   summarise(
     mean = mean(value),
-    sd   = sd(value),
-    mc_se = sd / sqrt(n()),
+    sd = sd(value),
+    mc_se = sd(value) / sqrt(n()),
     ci_lo = mean - 1.96 * mc_se,
     ci_hi = mean + 1.96 * mc_se,
     q025 = quantile(value, 0.025),
-    q50  = quantile(value, 0.50),
+    q50 = quantile(value, 0.50),
     q975 = quantile(value, 0.975),
     .groups = "drop"
-  )
-
-sum_table
-kable(
-  sum_table |> mutate(across(where(is.numeric), ~ round(.x, 3))),
-  caption = "Monte Carlo summary of bias decomposition components (Simulation 3, CRCR)."
-)
-
-
-
-## CRNAR case
-set.seed(1)
-n <- 30000
-
-X  <- rbinom(n, 1, 0.5)
-X0 <- 0
-X1 <- 1
-
-## PO of Y - affected by X
-Y0 <- rnorm(n, 0, 1)
-Y1 <- rnorm(n, 1, 1)
-
-Y <- ifelse(X == 0, Y0, Y1)
-
-R0 <- rbinom(n, 1, 0.1)
-R1 <- rbinom(n, 1, 0.7)
-R <- ifelse(Y > 0, R1, R0) ## R is affected by Y
-
-## PO of R_hat - related to R
-R_hat0 <- rbinom(n, 1, 0.2)
-R_hat1 <- rbinom(n, 1, 0.7)
-
-R_hat <- ifelse(R == 0, R_hat0, R_hat1)
-
-## CR pattern
-CR <- runif(n, -1, 1)
-
-## Y_trueCR - Y variable under CR
-Y_obs <- ifelse(R == 1, Y, CR)
-
-
-TE_true <- mean(Y1 - Y0)
-
-# -----------------------
-# Estimation helpers
-# -----------------------
-get_slope <- function(y, x) {
-  unname(coef(lm(y ~ x))["x"])
-}
-
-# (A) "Ignore CR" estimator (uses contaminated Y_obs, all data)
-est_all <- get_slope(Y_obs, X)
-
-# (B) Oracle deletion using TRUE R (not available in practice)
-est_R1  <- get_slope(Y_obs[R == 1], X[R == 1])
-
-# (C) Practical deletion using R_hat (what you'd do with a detector)
-est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
-
-# -----------------------
-# Bias decomposition (2-part)
-# -----------------------
-total_bias_practical <- est_Rhat1 - TE_true
-
-bias_oracle_deletion <- est_R1    - TE_true # effect of deleting (R known)
-bias_misclass_R      <- est_Rhat1 - est_R1  # extra bias from using R_hat
-
-# exact add-up check
-bias_decomp_check <- total_bias_practical -
-  ( bias_oracle_deletion + bias_misclass_R)
-
-data.frame(
-  TE_true = TE_true,
-  est_all = est_all,
-  est_R1_oracle = est_R1,
-  est_Rhat1_practical = est_Rhat1,
-  total_bias_practical = total_bias_practical,
-  bias_oracle_deletion = bias_oracle_deletion,
-  bias_misclass_R = bias_misclass_R,
-  bias_decomp_check = bias_decomp_check
-)
-
-# ------------------------------------------------------------
-# Monte Carlo wrapper to "verify" the decomposition in expectation
-# (i.e., see how components behave across repeated samples)
-# ------------------------------------------------------------
-simulate_once <- function(n = 30000,
-                          pRhat1_R0 = 0.2,
-                          pRhat1_R1 = 0.7) {
-  
-  X <- rbinom(n, 1, 0.5)
-  
-  Y0 <- rnorm(n, 0, 1)
-  Y1 <- rnorm(n, 1, 1)
-  Y  <- ifelse(X == 0, Y0, Y1)
-  
-  R0 <- rbinom(n, 1, 0.1)
-  R1 <- rbinom(n, 1, 0.7)
-  R <- ifelse(Y > 0, R1, R0)
-  
-  R_hat0 <- rbinom(n, 1, pRhat1_R0)
-  R_hat1 <- rbinom(n, 1, pRhat1_R1)
-  R_hat  <- ifelse(R == 0, R_hat0, R_hat1)
-  
-  
-  CR <- runif(n, -1, 1)
-  Y_obs <- ifelse(R == 1, Y, CR)
-  
-  TE_true <- mean(Y1 - Y0)
-  
-  get_slope <- function(y, x) unname(coef(lm(y ~ x))["x"])
-  
-  est_all   <- get_slope(Y_obs, X)
-  est_R1    <- get_slope(Y_obs[R == 1], X[R == 1])
-  est_Rhat1 <- get_slope(Y_obs[R_hat == 1], X[R_hat == 1])
-  
-  total_bias_practical <- est_Rhat1 - TE_true
-  bias_oracle_deletion <- est_R1    - TE_true
-  bias_misclass_R      <- est_Rhat1 - est_R1
-  
-  bias_decomp_check <- total_bias_practical -
-    (bias_oracle_deletion + bias_misclass_R)
-  
-  c(
-    TE_true = TE_true,
-    est_all = est_all,
-    est_R1_oracle = est_R1,
-    est_Rhat1_practical = est_Rhat1,
-    total_bias_practical = total_bias_practical,
-    bias_oracle_deletion = bias_oracle_deletion,
-    bias_misclass_R = bias_misclass_R,
-    bias_decomp_check = bias_decomp_check
-  )
-}
-
-set.seed(1)
-M <- 1000
-out <- replicate(M, simulate_once(), simplify = "matrix")
-out <- t(out)
-summary_df <- as.data.frame(out)
-
-colMeans(summary_df)
-library(dplyr)
-library(tidyr)
-
-sum_table <- summary_df |>
-  select(
-    total_bias_practical,
-    bias_oracle_deletion,
-    bias_misclass_R,
-    bias_decomp_check
   ) |>
-  pivot_longer(everything(), names_to = "quantity", values_to = "value") |>
-  group_by(quantity) |>
-  summarise(
-    mean = mean(value),
-    sd   = sd(value),
-    mc_se = sd / sqrt(n()),
-    ci_lo = mean - 1.96 * mc_se,
-    ci_hi = mean + 1.96 * mc_se,
-    q025 = quantile(value, 0.025),
-    q50  = quantile(value, 0.50),
-    q975 = quantile(value, 0.975),
-    .groups = "drop"
-  )
+  arrange(mechanism, quantity)
 
-sum_table
-kable(
-  sum_table |> mutate(across(where(is.numeric), ~ round(.x, 3))),
-  caption = "Monte Carlo summary of bias decomposition components (Simulation 3, CRNAR)."
+print(decomposition_summary)
+
+write.csv(
+  decomposition_summary,
+  file = "simulation3_bias_decomposition.csv",
+  row.names = FALSE
 )
 
+write_decomposition_table <- function(mechanism_name) {
+  table_data <- decomposition_summary |>
+    filter(mechanism == mechanism_name) |>
+    select(
+      Quantity = quantity,
+      Mean = mean,
+      SD = sd,
+      `MC SE` = mc_se,
+      `CI-L` = ci_lo,
+      `CI-U` = ci_hi
+    )
+  
+  latex_table <- kable(
+    table_data,
+    format = "latex",
+    booktabs = TRUE,
+    digits = 4,
+    caption = paste0(
+      "Monte Carlo Summary of Bias Decomposition Components in ",
+      "Simulation 3 Under ", mechanism_name
+    ),
+    label = paste0("tab:mc-bias-decomp-", tolower(mechanism_name)),
+    escape = TRUE
+  )
+  
+  writeLines(
+    latex_table,
+    paste0("table_simulation3_decomposition_", tolower(mechanism_name), ".tex")
+  )
+}
+
+write_decomposition_table("CRCR")
+write_decomposition_table("CRNAR")
