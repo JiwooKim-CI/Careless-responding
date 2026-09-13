@@ -1,5 +1,5 @@
 ## Simulation 3: Bias from handling and imperfect detection
-## Produces comprehensive Table S3 and the two decomposition tables.
+
 
 library(dplyr)
 library(tidyr)
