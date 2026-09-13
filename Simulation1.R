@@ -82,9 +82,9 @@ p1_1
 set.seed(1)
 
 simulate_once <- function(n = 30000) {
-  x <- rnorm(n, 0, 1)
-  c_lat <- .5*x + rnorm(n, 0, 1)
-  c <- ifelse(c_lat > 0, 1, 0)
+  c <- rnorm(n, 0, 1)
+  x_lat <- .5*c + rnorm(n, 0, 1)
+  x <- ifelse(x_lat > 0, 1, 0)
   u <- rnorm(n, 0, 1)
   p <- 0.6 * c + rnorm(n, 0, 1)
   r <- ifelse(p > 0, 1, 0)
