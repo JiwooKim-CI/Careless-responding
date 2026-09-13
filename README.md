@@ -63,8 +63,7 @@ $$
 This parameterization gives $X_i^*$ a marginal mean of zero and a marginal variance of one. The probability of attentive responding is
 
 $$\Pr(R_i^{CR}=1\mid C_i)=
-\frac{\exp(0.6C_i)}
-{1+\exp(0.6C_i)}.
+\frac{\exp(0.6C_i)}{1+\exp(0.6C_i)}.
 $$
 
 Thus, $C_i$ is a common cause of $X_i^*$ and $R_i^{CR}$.
